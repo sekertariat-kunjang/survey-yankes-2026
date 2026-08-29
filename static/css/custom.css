@@ -1,0 +1,119 @@
+/* Custom CSS for CeKReK survey form */
+
+/* Background radial gradient decoration */
+body {
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Slide animations for multi-step form transitions */
+.step-container {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.step-container.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Hide default checkboxes and radios for custom selector tiles */
+.tile-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Style custom selector tiles */
+.tile-card {
+    border: 2px solid #e2e8f0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.tile-card:hover {
+    border-color: #99f6e4;
+    background-color: #f0fdfa;
+    transform: translateY(-2px);
+}
+
+.tile-input:checked + .tile-card {
+    border-color: #0d9488;
+    background-color: #f0fdfa;
+    box-shadow: 0 4px 12px -2px rgba(20, 184, 166, 0.15);
+}
+
+.tile-input:checked + .tile-card .check-indicator {
+    background-color: #0d9488;
+    border-color: #0d9488;
+    color: white;
+}
+
+.tile-input:checked + .tile-card .check-indicator i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Checkbox checklist tile */
+.chk-tile {
+    border-left: 4px solid #cbd5e1;
+    transition: all 0.2s ease;
+}
+
+.chk-tile:hover {
+    background-color: #f8fafc;
+    border-left-color: #99f6e4;
+}
+
+.chk-input:checked + .chk-tile {
+    border-left-color: #0d9488;
+    background-color: #f0fdfa;
+}
+
+/* Micro-animations */
+@keyframes pulse-soft {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.pulse-button {
+    animation: pulse-soft 2s infinite ease-in-out;
+}
+
+

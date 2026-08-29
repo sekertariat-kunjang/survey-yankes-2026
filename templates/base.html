@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CeKReK - Survei Pelayanan Kesehatan Puskesmas</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="CeKReK (Cek langsung Kondisi dan buktikan layanan Puskesmas sudah sesuai dengan standaR Kesehatan)">
+    <meta name="author" content="Dinas Kesehatan">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, h4, .font-title {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+    
+    <!-- Glassmorphism Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/80 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-brand-600 to-emerald-400 p-2 rounded-xl text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-notes-medical text-xl"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-xl font-title tracking-tight bg-gradient-to-r from-brand-700 to-emerald-600 bg-clip-text text-transparent">CeKReK</span>
+                    <span class="hidden sm:inline-block text-xs text-slate-500 ml-2 font-medium border-l border-slate-200 pl-2">Survei Layanan Puskesmas</span>
+                </div>
+            </div>
+            
+            <nav class="flex items-center space-x-1 sm:space-x-3">
+                <a href="{{ url_for('index') }}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-slate-50 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-pen text-base"></i>
+                    <span>Isi Survei</span>
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-slate-50 transition-all flex items-center gap-1.5 border border-transparent hover:border-slate-200">
+                    <i class="fa-solid fa-chart-line text-base"></i>
+                    <span>Dashboard Admin</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col justify-center py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Aesthetic Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-slate-500 text-center md:text-left">
+                <strong>CeKReK</strong> &copy; 2026. Cek langsung Kondisi dan buktikan layanan Puskesmas sudah sesuai standar Kesehatan.
+            </div>
+            <div class="flex items-center space-x-6 text-sm text-slate-400">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved text-brand-500"></i> Aman & Rahasia</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-circle-check text-brand-500"></i> Terintegrasi</span>
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
