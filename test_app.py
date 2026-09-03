@@ -106,6 +106,32 @@ class SurveyAppTestCase(unittest.TestCase):
         self.assertIn('application/x-sqlite3', response.headers['Content-Type'])
         self.assertIn('survey_backup_', response.headers['Content-Disposition'])
 
+    def test_backup_reminder_banner_rendering(self):
+        """Red reminder banner is rendered when backup is due."""
+        from unittest.mock import patch
+        with self.client.session_transaction() as sess:
+            sess['admin_logged_in'] = True
+            sess['admin_username'] = 'admin'
+
+        with patch('app.get_latest_backup_info', return_value=(True, 9, '25 Feb 2026, 10:00')):
+            # Dashboard shows banner
+            resp = self.client.get('/dashboard')
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(b'backup-reminder-banner', resp.data)
+            self.assertIn(b'Intervensi Backup Mingguan', resp.data)
+            self.assertIn(b'9 hari', resp.data)
+
+            # Public survey page NEVER shows backup reminder banner
+            home_resp = self.client.get('/')
+            self.assertEqual(home_resp.status_code, 200)
+            self.assertNotIn(b'backup-reminder-banner', home_resp.data)
+
+        # When backup was just made (not due)
+        with patch('app.get_latest_backup_info', return_value=(False, 0, '03 Sep 2026, 15:00')):
+            resp = self.client.get('/dashboard')
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn(b'backup-reminder-banner', resp.data)
+
     # ------------------------------------------------------------------
     # Submission test
     # ------------------------------------------------------------------

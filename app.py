@@ -30,6 +30,56 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+def get_latest_backup_info():
+    """
+    Check backups directory and return (needs_backup: bool, days_since: int or None, last_backup_str: str or None).
+    Backup is flagged as needed if >= 7 days (1 week) have passed since the last backup or no backups exist.
+    """
+    backup_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'backups')
+    if not os.path.exists(backup_dir):
+        return True, None, None
+
+    backup_files = [
+        f for f in os.listdir(backup_dir)
+        if f.startswith('survey_backup_') and f.endswith('.db')
+    ]
+    if not backup_files:
+        return True, None, None
+
+    try:
+        latest_file = max(
+            backup_files,
+            key=lambda f: os.path.getmtime(os.path.join(backup_dir, f))
+        )
+        latest_path = os.path.join(backup_dir, latest_file)
+        latest_mtime = datetime.fromtimestamp(os.path.getmtime(latest_path))
+
+        delta = datetime.now() - latest_mtime
+        days_since = delta.days
+        needs_backup = days_since >= 7
+
+        return needs_backup, days_since, latest_mtime.strftime('%d %b %Y, %H:%M')
+    except Exception as e:
+        logger.warning('Error checking latest backup file: %s', e)
+        return True, None, None
+
+
+@app.context_processor
+def inject_backup_status():
+    if session.get('admin_logged_in'):
+        needs_backup, days_since, last_backup_str = get_latest_backup_info()
+        return {
+            'show_backup_reminder': needs_backup,
+            'days_since_backup': days_since,
+            'last_backup_date': last_backup_str,
+        }
+    return {
+        'show_backup_reminder': False,
+        'days_since_backup': None,
+        'last_backup_date': None,
+    }
+
 # ---------------------------------------------------------------------------
 # Scoring configuration — centralised so methodology changes happen here only
 # ---------------------------------------------------------------------------

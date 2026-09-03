@@ -1,5 +1,40 @@
 {% extends 'base.html' %}
 
+{% block top_banner %}
+{% if show_backup_reminder %}
+<!-- Full-Span Red Backup Reminder Banner (Khusus Halaman Dashboard Admin) -->
+<div id="backup-reminder-banner" class="w-full bg-gradient-to-r from-rose-700 via-red-600 to-rose-700 text-white px-4 py-3 shadow-lg border-b border-rose-800 sticky top-0 z-[60] transition-all">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
+        <div class="flex items-center gap-3 text-center sm:text-left">
+            <span class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 text-white font-bold text-base shadow-sm animate-pulse">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+            <div>
+                <span class="font-extrabold tracking-wide uppercase bg-rose-900/60 px-2 py-0.5 rounded text-[11px] mr-1.5 border border-rose-400/30">
+                    Intervensi Backup Mingguan
+                </span>
+                <span class="font-medium">
+                    {% if last_backup_date %}
+                        Sudah <strong>{{ days_since_backup }} hari</strong> sejak pencadangan terakhir ({{ last_backup_date }}). Segera amankan data survei terbaru!
+                    {% else %}
+                        Database belum pernah dicadangkan. Segera lakukan backup database rutin mingguan untuk mengamankan data!
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <a href="{{ url_for('backup_db') }}" class="px-4 py-1.5 rounded-lg bg-white text-rose-700 hover:bg-rose-50 font-bold shadow-sm transition-all flex items-center gap-1.5 text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-download"></i> Backup Sekarang
+            </a>
+            <button type="button" onclick="document.getElementById('backup-reminder-banner').remove()" class="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Tutup Sementara">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-8">
     
