@@ -126,12 +126,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('gps_verified').value = '1';
 
                     // Highlight and select this Puskesmas
-                    const radio = document.querySelector(`input[name="lokasi"][value="Puskesmas ${closestPusk}"]`);
-                    if (radio) {
-                        radio.checked = true;
+                    const lokasiSelect = document.getElementById('lokasi') || document.querySelector('select[name="lokasi"]');
+                    if (lokasiSelect) {
+                        lokasiSelect.value = `Puskesmas ${closestPusk}`;
                         // Trigger change event to update aesthetics
                         const event = new Event('change');
-                        radio.dispatchEvent(event);
+                        lokasiSelect.dispatchEvent(event);
                     }
 
                     title.textContent = "Lokasi GPS Terverifikasi";
@@ -172,9 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateManualDistance() {
         if (userLat === null || userLon === null) return;
         
-        const selectedRadio = document.querySelector('input[name="lokasi"]:checked');
-        if (selectedRadio) {
-            const puskName = selectedRadio.value.replace('Puskesmas ', '');
+        const lokasiSelect = document.getElementById('lokasi') || document.querySelector('select[name="lokasi"]');
+        if (lokasiSelect && lokasiSelect.value) {
+            const puskName = lokasiSelect.value.replace('Puskesmas ', '');
             const coords = PUSKESMAS_COORDS[puskName];
             
             if (coords) {
@@ -214,10 +214,11 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshBtn.addEventListener('click', initGeolocation);
     }
 
-    // Bind radio changes to update distances dynamically in manual mode
-    document.querySelectorAll('input[name="lokasi"]').forEach(radio => {
-        radio.addEventListener('change', updateManualDistance);
-    });
+    // Bind dropdown changes to update distances dynamically in manual mode
+    const lokasiSelect = document.getElementById('lokasi') || document.querySelector('select[name="lokasi"]');
+    if (lokasiSelect) {
+        lokasiSelect.addEventListener('change', updateManualDistance);
+    }
 
     // Step state tracking
     let currentStep = 1;
@@ -311,15 +312,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!isValid) return false;
 
-        // Custom validation: Puskesmas radio list in step 1
+        // Custom validation: Puskesmas dropdown in step 1
         if (step === 1) {
-            const locations = container.querySelectorAll('input[name="lokasi"]');
-            let isLocChecked = false;
-            locations.forEach(loc => {
-                if (loc.checked) isLocChecked = true;
-            });
-            if (!isLocChecked) {
+            const locSelect = container.querySelector('select[name="lokasi"]');
+            if (locSelect && (!locSelect.value || locSelect.value.trim() === '')) {
                 showAlert('Peringatan', 'Mohon pilih lokasi Puskesmas terlebih dahulu.', 'warning');
+                locSelect.focus();
                 return false;
             }
         }
