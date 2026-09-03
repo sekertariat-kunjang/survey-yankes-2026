@@ -2,6 +2,7 @@ import os
 import logging
 import sqlite3
 import json
+from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 import pandas as pd
@@ -428,6 +429,38 @@ def export_csv():
     except Exception as e:
         logger.error('Export CSV write error: %s', e, exc_info=True)
         return 'Gagal membuat file CSV. Hubungi administrator.', 500
+
+
+@app.route('/backup-db')
+@admin_required
+def backup_db():
+    if not os.path.exists(DATABASE):
+        return 'Database tidak ditemukan.', 404
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_filename = f'survey_backup_{timestamp}.db'
+
+    try:
+        backup_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'backups')
+        os.makedirs(backup_dir, exist_ok=True)
+        backup_path = os.path.join(backup_dir, backup_filename)
+
+        source_conn = get_db_connection()
+        dest_conn = sqlite3.connect(backup_path)
+        with dest_conn:
+            source_conn.backup(dest_conn)
+        dest_conn.close()
+        source_conn.close()
+
+        return send_file(
+            backup_path,
+            as_attachment=True,
+            download_name=backup_filename,
+            mimetype='application/x-sqlite3',
+        )
+    except Exception as e:
+        logger.error('Database backup error: %s', e, exc_info=True)
+        return 'Gagal melakukan backup database. Hubungi administrator.', 500
 
 
 if __name__ == '__main__':

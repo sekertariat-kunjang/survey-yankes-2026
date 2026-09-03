@@ -56,6 +56,12 @@ class SurveyAppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn('/login', response.headers['Location'])
 
+    def test_backup_db_requires_login(self):
+        """Unauthenticated visitor trying to access backup is redirected to login."""
+        response = self.client.get('/backup-db')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers['Location'])
+
     def test_login_page_loads(self):
         """Login page returns 200."""
         response = self.client.get('/login')
@@ -88,6 +94,17 @@ class SurveyAppTestCase(unittest.TestCase):
         response = self.client.get('/dashboard')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Dashboard Analisis', response.data)
+
+    def test_backup_db_when_authenticated(self):
+        """Authenticated admin can download SQLite database backup."""
+        with self.client.session_transaction() as sess:
+            sess['admin_logged_in'] = True
+            sess['admin_username'] = 'admin'
+
+        response = self.client.get('/backup-db')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('application/x-sqlite3', response.headers['Content-Type'])
+        self.assertIn('survey_backup_', response.headers['Content-Disposition'])
 
     # ------------------------------------------------------------------
     # Submission test
