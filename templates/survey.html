@@ -2,53 +2,24 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 w-full">
-    <!-- Progress Indicator -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-500">
-            <span class="step-lbl active-lbl text-brand-600 flex items-center gap-1.5" data-step="1">
-                <span class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">1</span>
-                <span class="hidden sm:inline">Identitas & Lokasi</span>
-            </span>
-            <div class="h-0.5 flex-grow bg-slate-200 mx-2 sm:mx-4 rounded step-line" data-line="1"></div>
-            
-            <span class="step-lbl flex items-center gap-1.5" data-step="2">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">2</span>
-                <span class="hidden sm:inline">Poli Rawat Jalan</span>
-            </span>
-            <div class="h-0.5 flex-grow bg-slate-200 mx-2 sm:mx-4 rounded step-line" data-line="2"></div>
-            
-            <span class="step-lbl flex items-center gap-1.5" data-step="3">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">3</span>
-                <span class="hidden sm:inline">Laboratorium</span>
-            </span>
-            <div class="h-0.5 flex-grow bg-slate-200 mx-2 sm:mx-4 rounded step-line" data-line="3"></div>
-            
-            <span class="step-lbl flex items-center gap-1.5" data-step="4">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">4</span>
-                <span class="hidden sm:inline">Farmasi</span>
-            </span>
-            <div class="h-0.5 flex-grow bg-slate-200 mx-2 sm:mx-4 rounded step-line" data-line="4"></div>
-            
-            <span class="step-lbl flex items-center gap-1.5" data-step="5">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">5</span>
-                <span class="hidden sm:inline">Keluhan</span>
-            </span>
-        </div>
-        <!-- Numeric mobile indicator -->
-        <div class="sm:hidden text-center mt-3 text-sm text-slate-600 font-medium">
-            Langkah <span id="mobile-step-curr">1</span> dari 5
-        </div>
-    </div>
-
     <!-- Survey Form Card -->
     <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 overflow-hidden relative glass-panel">
         
         <!-- Header Banner -->
-        <div class="bg-gradient-to-r from-brand-600 to-emerald-500 px-6 sm:px-8 py-8 text-white">
-            <h2 class="text-2xl sm:text-3xl font-extrabold font-title tracking-tight mb-2">CeKReK</h2>
-            <p class="text-teal-50 text-sm sm:text-base leading-relaxed opacity-95">
-                Cek langsung Kondisi dan buktikan layanan Puskesmas sudah sesuai dengan standaR Kesehatan.
-            </p>
+        <div class="bg-gradient-to-r from-brand-600 to-emerald-500 px-6 sm:px-8 py-7 sm:py-8 text-white">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold font-title tracking-tight mb-2">CeKReK</h2>
+                    <p class="text-teal-50 text-sm sm:text-base leading-relaxed opacity-95">
+                        Cek langsung Kondisi dan buktikan layanan Puskesmas sudah sesuai dengan standaR Kesehatan.
+                    </p>
+                </div>
+                <div class="inline-flex items-center gap-2 self-start sm:self-center px-3.5 py-1.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-xs sm:text-sm font-semibold tracking-wide shrink-0">
+                    <span>Tahap</span>
+                    <span id="header-step-curr" class="font-bold text-white bg-white/25 px-2 py-0.5 rounded-lg">1</span>
+                    <span class="text-teal-100">/ 5</span>
+                </div>
+            </div>
         </div>
 
         <form id="surveyForm" action="{{ url_for('submit') }}" method="POST" class="p-6 sm:p-8 space-y-8">

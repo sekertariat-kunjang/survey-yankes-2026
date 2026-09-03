@@ -276,7 +276,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Mobile numeric tracker
+        // Step numeric tracker
+        const headerStepCurr = document.getElementById('header-step-curr');
+        if (headerStepCurr) {
+            headerStepCurr.textContent = currentStep;
+        }
+
         const mobileStepCurr = document.getElementById('mobile-step-curr');
         if (mobileStepCurr) {
             mobileStepCurr.textContent = currentStep;
