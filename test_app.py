@@ -31,27 +31,70 @@ class SurveyAppTestCase(unittest.TestCase):
             conn.close()
 
     # ------------------------------------------------------------------
-    # Page-load tests
+    # Page-load & Auth tests
     # ------------------------------------------------------------------
 
-    def test_survey_page_loads(self):
-        """Main survey form returns 200 and contains expected content."""
+    def test_survey_page_loads_for_public(self):
+        """Public respondent can load survey form without login."""
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'CeKReK', response.data)
         self.assertIn(b'Form Penilaian Awal', response.data)
+        self.assertIn(b'Login Admin', response.data)
+        # Verify public menu no longer has "Isi Survei" and "Dashboard Admin" links
+        self.assertNotIn(b'<span>Isi Survei</span>', response.data)
 
-    def test_dashboard_page_loads(self):
-        """Dashboard page returns 200."""
+    def test_dashboard_requires_login(self):
+        """Unauthenticated visitor trying to access dashboard is redirected to login."""
+        response = self.client.get('/dashboard')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers['Location'])
+
+    def test_export_requires_login(self):
+        """Unauthenticated visitor trying to access export is redirected to login."""
+        response = self.client.get('/export')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers['Location'])
+
+    def test_login_page_loads(self):
+        """Login page returns 200."""
+        response = self.client.get('/login')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Login Administrator', response.data)
+
+    def test_login_failure(self):
+        """Wrong credentials fail with an error message."""
+        response = self.client.post('/login', data={'username': 'wrong', 'password': 'bad'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Autentikasi Gagal', response.data)
+
+    def test_login_success_and_logout(self):
+        """Correct credentials succeed and logout works."""
+        response = self.client.post('/login', data={'username': 'admin', 'password': 'admin123'}, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Dashboard Analisis', response.data)
+
+        # Now logout
+        logout_resp = self.client.get('/logout', follow_redirects=True)
+        self.assertEqual(logout_resp.status_code, 200)
+        self.assertIn(b'Login Admin', logout_resp.data)
+
+    def test_dashboard_page_loads_when_authenticated(self):
+        """Dashboard page returns 200 when logged in as admin."""
+        with self.client.session_transaction() as sess:
+            sess['admin_logged_in'] = True
+            sess['admin_username'] = 'admin'
+
         response = self.client.get('/dashboard')
         self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Dashboard Analisis', response.data)
 
     # ------------------------------------------------------------------
     # Submission test
     # ------------------------------------------------------------------
 
     def test_survey_submission(self):
-        """Full form submission stores data correctly and export is available."""
+        """Full form submission by public respondent succeeds without login."""
         payload = {
             'nama_pelaksana': self.TEST_PELAKSANA,
             'tanggal': '2026-08-27',
@@ -104,6 +147,7 @@ class SurveyAppTestCase(unittest.TestCase):
             ],
         }
 
+        # Submit without any login
         response = self.client.post('/submit', data=payload)
         self.assertEqual(response.status_code, 200)
 
@@ -132,7 +176,10 @@ class SurveyAppTestCase(unittest.TestCase):
         self.assertEqual(row['gps_verified'],   1)
         self.assertEqual(row['poli_q2_detail'], 'AC tidak dingin')
 
-        # Export should succeed now that data exists
+        # Export requires admin login: authenticate first
+        with self.client.session_transaction() as sess:
+            sess['admin_logged_in'] = True
+
         export_resp = self.client.get('/export')
         self.assertEqual(export_resp.status_code, 200)
         self.assertIn('text/csv', export_resp.headers['Content-Type'])
@@ -140,3 +187,4 @@ class SurveyAppTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -2,7 +2,8 @@ import os
 import logging
 import sqlite3
 import json
-from flask import Flask, render_template, request, jsonify, send_file
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 import pandas as pd
 
 # ---------------------------------------------------------------------------
@@ -12,7 +13,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'cekrek-yankes-secret-key-2026')
 DATABASE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'survey.db')
+
+# Admin credentials (default can be overridden via environment variables)
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('login', next=request.path))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # ---------------------------------------------------------------------------
 # Scoring configuration — centralised so methodology changes happen here only
@@ -276,7 +291,37 @@ def submit():
         return jsonify({'status': 'error', 'message': 'Terjadi kesalahan saat menyimpan data. Hubungi administrator.'}), 500
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('admin_logged_in'):
+        return redirect(url_for('dashboard'))
+
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            session['admin_username'] = username
+            next_url = request.args.get('next')
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
+            return redirect(url_for('dashboard'))
+        else:
+            error = 'Nama pengguna atau kata sandi tidak sesuai. Silakan coba lagi.'
+
+    return render_template('login.html', error=error)
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+
 @app.route('/dashboard')
+@admin_required
 def dashboard():
     conn = get_db_connection()
     try:
@@ -352,6 +397,7 @@ def dashboard():
 
 
 @app.route('/export')
+@admin_required
 def export_csv():
     conn = get_db_connection()
     try:
