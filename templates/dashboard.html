@@ -313,20 +313,45 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+{% if total_responses > 0 %}
+<script id="compliance-data" type="application/json">
+{{ compliance_scores | tojson | safe }}
+</script>
+<script id="puskesmas-data" type="application/json">
+{{ location_data | safe }}
+</script>
+<script id="section-data" type="application/json">
+{{ section_performances | tojson | safe }}
+</script>
+{% endif %}
+
 <script>
+    // Close details modal (available globally)
+    function closeDetailsModal() {
+        const modal = document.getElementById('detailsModal');
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        const modalBox = modal.querySelector('div');
+        if (modalBox) modalBox.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
     // Initialize charts and UI if data is present
-    {% if total_responses > 0 %}
+    const complianceScript = document.getElementById('compliance-data');
+    if (complianceScript) {
+        // Pre-load all compliance data keyed by response ID.
+        // This avoids embedding large JSON blobs inside inline onclick attributes (XSS vector).
+        const COMPLIANCE_DATA = JSON.parse(complianceScript.textContent || '[]');
+        const surveyDataById = {};
+        COMPLIANCE_DATA.forEach(function(item) { surveyDataById[item.id] = item; });
 
-    // Pre-load all compliance data keyed by response ID.
-    // This avoids embedding large JSON blobs inside inline onclick attributes (XSS vector).
-    const COMPLIANCE_DATA = {{ compliance_scores | tojson | safe }};
-    const surveyDataById = {};
-    COMPLIANCE_DATA.forEach(function(item) { surveyDataById[item.id] = item; });
-
-    // Puskesmas Chart Data
-    const rawPuskesmasData = {{ location_data | safe }};
-    const pNames = Object.keys(rawPuskesmasData);
-    const pCounts = Object.values(rawPuskesmasData);
+        // Puskesmas Chart Data
+        const puskesmasScript = document.getElementById('puskesmas-data');
+        const rawPuskesmasData = puskesmasScript ? JSON.parse(puskesmasScript.textContent || '{}') : {};
+        const pNames = Object.keys(rawPuskesmasData);
+        const pCounts = Object.values(rawPuskesmasData);
 
     const ctxPuskesmas = document.getElementById('puskesmasChart').getContext('2d');
     new Chart(ctxPuskesmas, {
@@ -363,6 +388,8 @@
     });
 
     // Section Performance Chart Data
+    const sectionScript = document.getElementById('section-data');
+    const sectionPerformances = sectionScript ? JSON.parse(sectionScript.textContent || '{}') : {};
     const ctxSection = document.getElementById('sectionChart').getContext('2d');
     new Chart(ctxSection, {
         type: 'doughnut',
@@ -370,10 +397,10 @@
             labels: ['Poli', 'Lab', 'Farmasi', 'Keluhan'],
             datasets: [{
                 data: [
-                    {{ section_performances.poli }},
-                    {{ section_performances.lab }},
-                    {{ section_performances.farmasi }},
-                    {{ section_performances.keluhan }}
+                    sectionPerformances.poli || 0,
+                    sectionPerformances.lab || 0,
+                    sectionPerformances.farmasi || 0,
+                    sectionPerformances.keluhan || 0
                 ],
                 backgroundColor: [
                     'rgba(79, 70, 229, 0.7)', // Indigo
@@ -614,14 +641,6 @@
         }, 10);
     }
 
-    function closeDetailsModal() {
-        const modal = document.getElementById('detailsModal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
     }
-    {% endif %}
 </script>
 {% endblock %}
