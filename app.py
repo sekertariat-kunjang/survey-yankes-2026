@@ -7,6 +7,13 @@ from functools import wraps
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 import pandas as pd
 
+# Load environment variables from .env file if available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
